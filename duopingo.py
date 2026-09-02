@@ -17,11 +17,13 @@ def generate_quiz(input: str, difficulty: str, questions_number: int):
         introduction: str
         questions: list[Question]
 
-    instructions = f"Generate a quiz of {questions_number} multiple-choice questions to test the user's knowledge about the topic given. Write a short introduction about the topic. "
-    if difficulty == "Medium":
-        instructions += " Make the questions challenging. Make some of the options tricky and similar to each other."
+    instructions = f"Generate a quiz of {questions_number} multiple-choice questions to test the user's knowledge about the topic given. Write a short introduction about the topic."
+    if difficulty == "Easy":
+        instructions += " Make the questions relatively simple."
+    elif difficulty == "Medium":
+        instructions += " Make the questions moderately challenging. Make some of the options tricky and similar to each other."
     elif difficulty == "Hard":
-        instructions += " Make the questions extremely challenging. Make the options tricky and similar to each other."
+        instructions += " Make the questions advanced and extremely challenging. Make the options tricky and similar to each other."
 
     client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
     response = client.responses.parse(
