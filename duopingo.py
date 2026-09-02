@@ -25,7 +25,7 @@ def generate_quiz(input: str):
         instructions = instructions,
         input = input,
         text_format=Quiz,
-        tools=[],  # Ensure "tools" either omits {"type": "web_search"} or is completely empty
+        tools=[],  #  [{"type": "web_search"}]
         reasoning={"effort": "low"}  # Choose from "low", "medium", or "high"
     )
 
@@ -44,8 +44,14 @@ tab1, tab2 = st.tabs(["Text Input", "File Upload"])
 
 with tab1:
     with st.form("prompt_form"):
-        st.session_state.prompt = st.text_area("Describe what you want to learn:")
+        prompt = st.text_area("Describe what you want to learn:")
         submit_button = st.form_submit_button(label="Generate Quiz")
+    if submit_button and prompt:
+        st.session_state.prompt = prompt
+        st.write("Generating quiz...")
+        st.session_state.quiz = generate_quiz(st.session_state.prompt).output_parsed
+        st.balloons()
+
 
 with tab2:
     with st.form("file_form"):
@@ -54,11 +60,10 @@ with tab2:
 
     if submit_button and uploaded_file is not None:
         st.session_state.prompt = uploaded_file.read().decode("utf-8")
+        st.write("Generating quiz...")
+        st.session_state.quiz = generate_quiz(st.session_state.prompt).output_parsed
+        st.balloons()
 
-if st.session_state.prompt is not None:
-    st.write("Generating quiz...")
-    st.session_state.quiz = generate_quiz(st.session_state.prompt).output_parsed
-    st.balloons()
 
 if st.session_state.quiz is not None:
     quiz = st.session_state.quiz
