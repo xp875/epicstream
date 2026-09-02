@@ -37,14 +37,27 @@ st.write("# Duopingo: learn anything")
 if "quiz" not in st.session_state:
     st.session_state.quiz = None
 
+if "prompt" not in st.session_state:
+    st.session_state.prompt = None
 
-with st.form("prompt_form"):
-    prompt = st.text_input  ("Describe what you want to learn:")
-    submit_button = st.form_submit_button(label="Generate Quiz")
+tab1, tab2 = st.tabs(["Text Input", "File Upload"])
 
-if submit_button:
+with tab1:
+    with st.form("prompt_form"):
+        st.session_state.prompt = st.text_area("Describe what you want to learn:")
+        submit_button = st.form_submit_button(label="Generate Quiz")
+
+with tab2:
+    with st.form("file_form"):
+        uploaded_file = st.file_uploader("Upload study notes:", "txt")
+        submit_button = st.form_submit_button(label="Generate Quiz")
+
+    if submit_button and uploaded_file is not None:
+        st.session_state.prompt = uploaded_file.read().decode("utf-8")
+
+if st.session_state.prompt is not None:
     st.write("Generating quiz...")
-    st.session_state.quiz = generate_quiz(prompt).output_parsed
+    st.session_state.quiz = generate_quiz(st.session_state.prompt).output_parsed
     st.balloons()
 
 if st.session_state.quiz is not None:
