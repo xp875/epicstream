@@ -3,7 +3,7 @@ from openai import OpenAI
 from pydantic import BaseModel, Field
 
 
-def generate_quiz(input: str):
+def generate_quiz(input: str, difficulty: str, questions_number: int):
     """
     Generate a quiz based on the input text and instructions.
     """
@@ -17,7 +17,11 @@ def generate_quiz(input: str):
         introduction: str
         questions: list[Question]
 
-    instructions = "Generate a quiz of 5 multiple-choice questions to test the user's knowledge about the topic given. Write a short introduction about the topic."
+    instructions = f"Generate a quiz of {questions_number} multiple-choice questions to test the user's knowledge about the topic given. Write a short introduction about the topic. "
+    if difficulty == "Medium":
+        instructions += " Make the questions challenging. Make some of the options tricky and similar to each other."
+    elif difficulty == "Hard":
+        instructions += " Make the questions extremely challenging. Make the options tricky and similar to each other."
 
     client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
     response = client.responses.parse(
@@ -40,28 +44,27 @@ if "quiz" not in st.session_state:
 if "prompt" not in st.session_state:
     st.session_state.prompt = None
 
-tab1, tab2 = st.tabs(["Text Input", "File Upload"])
+with st.form("input_form"):
 
-with tab1:
-    with st.form("prompt_form"):
+    tab1, tab2 = st.tabs(["Text Input", "File Upload"])
+
+    with tab1:
         prompt = st.text_area("Describe what you want to learn:")
-        submit_button = st.form_submit_button(label="Generate Quiz")
-    if submit_button and prompt:
-        st.session_state.prompt = prompt
-        st.write("Generating quiz...")
-        st.session_state.quiz = generate_quiz(st.session_state.prompt).output_parsed
-        st.balloons()
-
-
-with tab2:
-    with st.form("file_form"):
+    with tab2:
         uploaded_file = st.file_uploader("Upload study notes:", "txt")
-        submit_button = st.form_submit_button(label="Generate Quiz")
 
-    if submit_button and uploaded_file is not None:
-        st.session_state.prompt = uploaded_file.read().decode("utf-8")
-        st.write("Generating quiz...")
-        st.session_state.quiz = generate_quiz(st.session_state.prompt).output_parsed
+    questions_number = st.number_input("Number of questions:", min_value=2, max_value=20, value=5, step=1)
+    difficulty = st.select_slider("Difficulty:", ["Easy", "Medium", "Hard"], "Easy", width=200)
+
+    submit_button = st.form_submit_button(label="Generate Quiz")
+    
+    if submit_button and prompt:
+        if uploaded_file is not None:
+            prompt = uploaded_file.read().decode("utf-8")
+        
+        st.session_state.prompt = prompt
+        with st.spinner("Generating quiz..."):
+            st.session_state.quiz = generate_quiz(st.session_state.prompt, difficulty=difficulty, questions_number=questions_number).output_parsed
         st.balloons()
 
 
