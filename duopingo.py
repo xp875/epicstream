@@ -7,3 +7,5 @@ st.write(
     "and you'll become the next Einstein! Simply tell us what you want to learn, and you'll get short daily lessons and quizzes to stretch your mind."
 )
 
+st.page_link("pages/1_Learn.py", label="Learn")
+st.page_link("pages/2_Quiz.py", label="Take a Quiz")
